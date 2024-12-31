@@ -1,0 +1,8 @@
+Lib/
+bin/
+*.jar
+*.class
+trufflehog-burp-server
+out*.txt
+context.py
+context.txt
