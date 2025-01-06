@@ -14,6 +14,7 @@ import tempfile
 import shutil
 import uuid
 import subprocess
+import sys
 
 # Python 2/3 cross-compat in Jython:
 try:
@@ -352,7 +353,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IExtensionStateListener):
                 return
             raise e
         except Exception as e:
-            self._callbacks.printError("Error parsing response line. Error: " + str(e) + " Line: " + line)
+            self._callbacks.printError("Error parsing response line at line " + str(sys.exc_info()[2].tb_lineno) + ". Error: " + str(e) + " Line: " + line)
 
     def extensionUnloaded(self):
         """Shutdown the child process and cleanup temp files when Burp Suite is closed."""
@@ -495,10 +496,10 @@ class BurpExtender(IBurpExtender, IHttpListener, IExtensionStateListener):
         issue += "<b>Decoder Type:</b> " + secret_details["decoderType"] + "<br>"
         issue += "<b>Secret:</b> " + secret_details["raw"] + "<br>"
         issue += "<b>Secret Redacted:</b> " + secret_details["redacted"] + "<br>"
-        if secret_details["extraData"]:
+        if secret_details.get("extraData"):
             for k, v in secret_details["extraData"].items():
                 k_clean = k.replace("_", " ").title()
-                issue += "<b>" + k_clean + ":</b> " + v + "<br>"
+                issue += "<b>" + k_clean + ":</b> " + str(v) + "<br>"
         issue += "<b>Description:</b> " + secret_details["detectorDescription"] + "<br>"
         issue += "</p>"
         return issue
