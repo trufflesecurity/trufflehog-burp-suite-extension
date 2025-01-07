@@ -1,6 +1,6 @@
 # TruffleHog Burp Suite Extension
 
-Scan Burp Suite traffic for over 800+ different types of secrets (API keys, passwords, SSH keys, etc) using TruffleHog! 
+Scan Burp Suite traffic for 800+ different types of secrets (API keys, passwords, SSH keys, etc) using TruffleHog! 
 
 ![TruffleHog Burp Extension](./docs/images/main.png)
 
@@ -17,6 +17,8 @@ Scan Burp Suite traffic for over 800+ different types of secrets (API keys, pass
 ![TruffleHog Tab](./docs/images/specify_path.png)
 
 4. All results are displayed in the `TruffleHog` tab.
+
+![TruffleHog Results](./docs/images/results.png)
 
 ### Troubleshooting
 
