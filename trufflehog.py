@@ -446,11 +446,13 @@ class BurpExtender(IBurpExtender, IHttpListener, IExtensionStateListener):
             # Format the secret details for the issue (advisory panel in UI)
             advisory = self.formatIssueDetails(secret)
 
-            # Avoid duplicates in the same normalized URL
-            for issue in self._callbacks.getScanIssues(normalized_url):
-                if advisory == (issue.getIssueDetail() or ""):
-                    break
-            else:
+            # Check for duplicate issues using the same normalized URL
+            duplicate = False
+            existing_issues = self._callbacks.getScanIssues(normalized_url)
+            if existing_issues:
+                duplicate = any(advisory == (issue.getIssueDetail() or "") for issue in existing_issues)
+
+            if not duplicate:
                 scanIssue = CustomScanIssue(
                     messageInfo.getHttpService(),
                     self._helpers.analyzeRequest(messageInfo).getUrl(),

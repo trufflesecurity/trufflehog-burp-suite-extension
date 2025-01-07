@@ -1,46 +1,73 @@
 # TruffleHog Burp Extension
 
-This repository contains a Burp Suite extension that implements TruffleHog to scan for over 800+ different types of secrets in Burp Suite HTTP traffic. All results are displayed in the `TruffleHog` tab in Burp Suite.
+Welcome to the Official TruffleHog Burp Suite Extension repository.
 
-## Getting Started
+![TruffleHog Burp Extension](./docs/images/main.png)
 
-### Prerequisites
+This extension uses TruffleHog to scan for over 800+ different types of secrets in Burp Suite HTTP traffic. All results are displayed in the `TruffleHog` tab in Burp Suite.
 
-- [Burp Suite](https://portswigger.net/burp/communitydownload)
-- [TruffleHog](https://github.com/trufflesecurity/trufflehog)
+## Quickstart
 
-If you don't have TruffleHog installed, you'll need to install it. You can see options here: https://github.com/trufflesecurity/trufflehog?tab=readme-ov-file#floppy_disk-installation
+1. [Install TruffleHog](https://github.com/trufflesecurity/trufflehog?tab=readme-ov-file#floppy_disk-installation) if you haven't already.
 
-**If you already have a Burp Suite Extension using Python, follow these steps:**
-1. Clone the repository to your local machine.
-2. Load the extension in Burp Suite under `Extensions -> Installed -> Add -> Select Python (Extension type) > Select the trufflehog.py file`.
-3. Once you load the extension, if we can't automatically find the TruffleHog binary in your PATH, you'll need to specify the path to the TruffleHog binary in the `TruffleHog` tab.
+2. Clone this repository to your local machine and load the extension in Burp Suite `Extensions -> Add -> Extension Type: Python > Extension File: trufflehog.py`.
 
-**If you don't already have a Burp Suite Extension using Python, follow these steps:**
-1. Download [Jython Standalone](https://www.jython.org/download.html).
-2. Specify the path to the jython-standalone jar in Burp Suite under `Settings -> Extensions -> Python environment`.
-3. Clone the repository to your local machine.
-4. Load the extension in Burp Suite under `Extensions -> Installed -> Add -> Select Python (Extension type) > Select the trufflehog.py file`.
-5. Once you load the extension, if we can't automatically find the TruffleHog binary in your PATH, you'll need to specify the path to the TruffleHog binary in the `TruffleHog` tab.
+![Extension Added](./docs/images/extension_added2.png)
 
-## Configurations
+3. If we can't automatically find the TruffleHog binary in your PATH, you'll need to specify the path to TruffleHog in the `TruffleHog` Burp Suite tab. This is super common behavior on OSX. You'll only need to do this once.
 
-There are two sets of configurations: Burp Suite and TruffleHog.
+![TruffleHog Tab](./docs/images/specify_path.png)
+
+#### Troubleshooting
+
+**Seeing the error "Jython JAR file has not been configured"?**
+
+Super easy fix. We built this extension in Python, so you'll need to configure a Jython JAR file in Burp Suite.
+
+1. Download [Jython Standalone](https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.4/jython-standalone-2.7.4.jar).
+2. Go to `Extensions -> Extension Settings -> Python environment`.
+3. Select the path to the `jython-standalone-2.7.4.jar` file for the "Location of Jython standalone JAR file" field.
+
+
+## (Optional) Configurations
+
+There are two types of configurations: Burp Suite and TruffleHog. 
+
+*Note: When you make a configuration change, you don't need to click a "Save" button or anything. Changes take effect automatically. This includes reloading the TruffleHog scanning engine.*
 
 ### Burp Suite
 
 By default, the extension will only scan *proxy* traffic. You can modify the configuration in the `TruffleHog` tab to scan other Burp Suite traffic (e.g., repeater, intruder, etc.). 
 
+![Burp Suite Configuration](./docs/images/burp_traffic.png)
+
 ### TruffleHog
 
-By default, the extension will attempt to verify each secret that it finds (more info here: https://trufflesecurity.com/blog/how-trufflehog-verifies-secrets). You can turn this off by deselecting the "Verify Secrets" checkbox. Also by default, the extension will **not** allow overlapping secret checks. You can turn this on by selecting the "Allow Overlapping Secret Checks" checkbox.
+Secret Verification is Enabled by default. This means that the extension will attempt to verify each secret that it finds via an HTTP request. Read more about this [here](https://trufflesecurity.com/blog/how-trufflehog-verifies-secrets). You can turn this off by de-selecting the "Verify Secrets" checkbox. 
 
-If we can't find the TruffleHog binary in your PATH (common when using Burp on OSX), you'll need to specify the path to the TruffleHog binary in the `TruffleHog` tab.
+Secret Verification Overlapping is Disabled by default. This means that the extension will **not** allow overlapping secret checks. Read more about this (here)[https://trufflesecurity.com/blog/contributor-spotlight-helena-rosenzweig-and-assetnote-team#:~:text=Imagine%20two%20companies,allow%2Dverification%2Doverlap.] You can turn this on by selecting the "Allow Overlapping Secret Checks" checkbox. 
 
+![TruffleHog Configuration](./docs/images/trufflehog_config.png)
 
 ## How it works
 
-After a lot of testing, we figured that the most efficient way to scan for secrets in Burp Suite was to write all of the HTTP traffic to disk in a temp directory and then invoke TruffleHog via OS command ever 10 seconds (assuming there are new files to scan). This does require some disk space, but in testing, it's really not that much. This method keeps the memory footprint of the extension low and let's us scan for secrets in Burp Suite traffic in near real-time.
+**tl;dr Every 10 seconds the extension runs TruffleHog to check for secrets in Burp Suite traffic.**
+
+1. The extension writes all HTTP traffic (from the configured Burp Suite tools - proxy, repeater, intruder, etc.) to disk in a temp directory.
+2. Every 10 seconds, the extension invokes TruffleHog to scan the files in that temp directory and then immediately deletes them.
+3. If secrets are found, they're reported in the `TruffleHog` tab. When you click into a detected secret, the `Location URLs` table will populate all endpoints containing that exact secret. When you click on a specific URL, you'll see the secret details, as well as actual request or response containing that secret.
+
+![Secret Details](./docs/images/secret_details.png)
+
+**Note about Secret Results:** If "Verify Secrets" is enabled (default), the `TruffleHog` tab will only show secrets that are currently live.
+
+**Note about Scanning Interval:** Because we're scanning in 10 second intervals, there may be a lag of up to 15 seconds between loading a page in Burp Suite containing a secret and seeing it displayed in the `TruffleHog` tab.
+
+**Note about Keyword Preflighting:** We separate the request/response headers from the request/response body content for analysis. We do this to add additional keyword context to the headers, which helps maximize the amount of secrets the extension can find. For more details, read about [keyword preflighting](https://trufflesecurity.com/blog/keyword-context-in-trufflehog).
+
+#### Extension Reloading
+
+If you reload the TruffleHog extension using Burp Suite Pro or Enterprise, your existing secrets *will* repopulate in the `TruffleHog` tab. If you're using Burp Suite Community, you'll need to re-scan the traffic to see the secrets (this is a limitation of Burp Suite Community and not this extension).
 
 ## Testing
 

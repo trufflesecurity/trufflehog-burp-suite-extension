@@ -45,6 +45,17 @@ class TruffleTab(ITab):
         }
         self.load_enabled_tools()
 
+        # Define tool order (jython version doesn't allow for keeping order via dictionary)
+        self.TOOL_ORDER = [
+            IBurpExtenderCallbacks.TOOL_PROXY,
+            IBurpExtenderCallbacks.TOOL_INTRUDER,
+            IBurpExtenderCallbacks.TOOL_REPEATER,
+            IBurpExtenderCallbacks.TOOL_SEQUENCER,
+            IBurpExtenderCallbacks.TOOL_SPIDER,
+            IBurpExtenderCallbacks.TOOL_SCANNER,
+            IBurpExtenderCallbacks.TOOL_EXTENDER
+        ]
+
         # Attempt to pre-populate the user’s path to TruffleHog via settings or PATH
         stored_path = self._callbacks.loadExtensionSetting(self.SETTING_TRUFFLEHOG_PATH)
         if stored_path and os.path.isabs(stored_path):
@@ -198,8 +209,10 @@ class TruffleTab(ITab):
         # Tool selection for traffic analysis
         toolPanel = JPanel(FlowLayout(FlowLayout.LEFT))
         self.toolCheckboxes = {}
-        for tool, details in self.TOOL_FLAGS.items():
-            checkbox = JCheckBox(details['name'], details['active'])
+        for tool in self.TOOL_ORDER:
+            name = self.TOOL_FLAGS[tool]['name']
+            active = self.TOOL_FLAGS[tool]['active']
+            checkbox = JCheckBox(name, active)
             checkbox.addItemListener(ToolCheckboxListener(self, tool))
             self.toolCheckboxes[tool] = checkbox
             toolPanel.add(checkbox)
