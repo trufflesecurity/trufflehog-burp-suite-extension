@@ -39,6 +39,8 @@ HEADER_BODY_SEPARATOR = b'\r\n\r\n'
 SCRIPT_NAME = "scanner.py"
 VERIFIED_FLAG = "--only-verified"
 OVERLAP_FLAG = "--allow-verification-overlap"
+# Check if the script is running on Windows or not
+INTERPRETER = "python" if 'windir' in os.environ else "python3"
 
 
 class BurpExtender(IBurpExtender, IHttpListener, IExtensionStateListener):
@@ -159,7 +161,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IExtensionStateListener):
             allow_overlap_flag = OVERLAP_FLAG if self.truffle_tab.getAllowOverlapFlag() else ""
 
             # Build the command to start the child process
-            command = ["python3", binary_path, "--tempdir", self.temp_dir, "--trufflehog-path", self.truffle_tab.trufflehog_exec_path, only_verified_flag, allow_overlap_flag]
+            command = [INTERPRETER, binary_path, "--tempdir", self.temp_dir, "--trufflehog-path", self.truffle_tab.trufflehog_exec_path, only_verified_flag, allow_overlap_flag]
 
             # Remove empty flags b/c they can cause errors
             command = [c for c in command if c]
