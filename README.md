@@ -6,29 +6,31 @@ Scan Burp Suite traffic for 800+ different types of secrets (API keys, passwords
 
 ## Quickstart
 
+### The easy way
+
+1. [Install TruffleHog](https://github.com/trufflesecurity/trufflehog?tab=readme-ov-file#floppy_disk-installation) if you haven't already.
+
+2. [Install the TruffleHog Burp Suite App](https://portswigger.net/bappstore/514b964549874209b3a4f70ec54e915d).
+
+<img width="1082" alt="Pasted_Image_3_12_25__12_29 PM" src="https://github.com/user-attachments/assets/9eec7a67-d063-44bd-b5ea-8057188f8aa8" />
+
+### The harder way
+
 1. [Install TruffleHog](https://github.com/trufflesecurity/trufflehog?tab=readme-ov-file#floppy_disk-installation) if you haven't already.
 
 2. Clone this repository to your local machine and load the extension in Burp Suite `Extensions -> Add -> Extension Type: Python > Extension File: trufflehog.py`.
 
 ![Extension Added](./docs/images/extension_added2.png)
 
-3. If we can't automatically find the TruffleHog binary in your PATH, you'll need to specify the path to TruffleHog in the `TruffleHog` Burp Suite tab. This is super common behavior on OSX. You'll only need to do this once.
+### After installation
+
+If we can't automatically find the TruffleHog binary in your PATH, you'll need to specify the path to TruffleHog in the `TruffleHog` Burp Suite tab. This is super common behavior on OSX. You'll only need to do this once.
 
 ![TruffleHog Tab](./docs/images/specify_path.png)
 
-4. All results are displayed in the `TruffleHog` tab.
+All results are displayed in the `TruffleHog` tab.
 
 ![TruffleHog Results](./docs/images/results.png)
-
-### Troubleshooting
-
-**Seeing the error "Jython JAR file has not been configured"?**
-
-Super easy fix. We built this extension in Python, so you'll need to configure a Jython JAR file in Burp Suite.
-
-1. Download [Jython Standalone](https://repo1.maven.org/maven2/org/python/jython-standalone/2.7.4/jython-standalone-2.7.4.jar).
-2. Go to `Extensions -> Extension Settings -> Python environment`.
-3. Select the path to the `jython-standalone-2.7.4.jar` file for the "Location of Jython standalone JAR file" field.
 
 ## How it works
 
